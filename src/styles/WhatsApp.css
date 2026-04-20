@@ -1,0 +1,150 @@
+.whatsapp-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #111b21;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Header */
+.whatsapp-header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: #202c33;
+    border-bottom: 1px solid #2a3942;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.whatsapp-icon {
+    width: 40px;
+    height: 40px;
+    background: #25d366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.whatsapp-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.header-title h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #e9edef;
+    margin: 0;
+}
+
+.header-title p {
+    font-size: 0.85rem;
+    color: #8696a0;
+    margin: 0;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #2a3942;
+    border-radius: 8px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.connection-status.connected .status-dot {
+    background: #25d366;
+    box-shadow: 0 0 8px #25d366;
+}
+
+.connection-status.disconnected .status-dot {
+    background: #f15c6d;
+}
+
+.status-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #e9edef;
+}
+
+.stats-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: #2a3942;
+    border-radius: 8px;
+}
+
+.stats-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #25d366;
+    line-height: 1;
+}
+
+.stats-label {
+    font-size: 0.7rem;
+    color: #8696a0;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+}
+
+/* Main Content */
+.whatsapp-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    background: #111b21;
+}
+
+/* Back Button */
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #2a3942;
+    border: none;
+    border-radius: 8px;
+    color: #e9edef;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 1rem;
+}
+
+.back-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.back-button:hover {
+    background: #374248;
+}

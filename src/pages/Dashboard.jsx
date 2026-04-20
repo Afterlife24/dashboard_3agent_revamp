@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   PieChart,
@@ -16,7 +17,7 @@ import {
 import * as XLSX from "xlsx";
 import "../styles/Dashboard.css";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'https://g1wymxzrle.execute-api.eu-west-3.amazonaws.com';
 
 const COLORS = {
   verified: "#00d4aa",
@@ -29,6 +30,7 @@ const COLORS = {
 };
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -206,6 +208,14 @@ function Dashboard() {
           >
             <span className="nav-icon">🤖</span>
             <span className="nav-text">Agent Usage</span>
+          </button>
+          <div className="nav-divider"></div>
+          <button
+            className="nav-item nav-item-whatsapp"
+            onClick={() => navigate("/whatsapp")}
+          >
+            <span className="nav-icon">💬</span>
+            <span className="nav-text">WhatsApp Agent</span>
           </button>
         </nav>
         <div className="sidebar-footer">
