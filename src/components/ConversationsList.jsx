@@ -8,6 +8,37 @@ function ConversationsList({ conversations, selectedConversation, onSelectConver
         conv.phone_number.includes(searchTerm)
     )
 
+    const formatTime = (timestamp) => {
+        if (!timestamp) return '';
+
+        try {
+            const date = new Date(timestamp);
+            const now = new Date();
+
+            // Check if message is from today
+            const isToday = date.getDate() === now.getDate() &&
+                date.getMonth() === now.getMonth() &&
+                date.getFullYear() === now.getFullYear();
+
+            if (isToday) {
+                // Show only time for today's messages
+                return date.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            } else {
+                // Show date for older messages
+                return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+        } catch (error) {
+            return timestamp;
+        }
+    }
+
     return (
         <div className="conversations-panel">
             <h2>Active Conversations</h2>
@@ -34,7 +65,7 @@ function ConversationsList({ conversations, selectedConversation, onSelectConver
                                 </span>
                             </div>
                             <p className="last-message">{conv.last_message}</p>
-                            <span className="timestamp">{conv.last_message_time}</span>
+                            <span className="timestamp">{formatTime(conv.last_message_time)}</span>
                         </div>
                     </div>
                 ))}

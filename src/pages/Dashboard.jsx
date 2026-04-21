@@ -49,13 +49,17 @@ function Dashboard() {
     recent: [],
   });
   const [agentLoading, setAgentLoading] = useState(false);
+  const [waitlistEntries, setWaitlistEntries] = useState([]);
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
     fetchAgentUsage();
+    fetchWaitlist();
     const interval = setInterval(() => {
       fetchUsers(true);
       fetchAgentUsage(true);
+      fetchWaitlist(true);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -91,6 +95,20 @@ function Dashboard() {
       console.warn("Failed to fetch agent usage:", err.message);
     } finally {
       if (!silent) setAgentLoading(false);
+    }
+  };
+
+  const fetchWaitlist = async (silent = false) => {
+    try {
+      if (!silent) setWaitlistLoading(true);
+      const response = await axios.get(`${API_URL}/api/waitlist/entries`);
+      if (response.data.success) {
+        setWaitlistEntries(response.data.data);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch waitlist:", err.message);
+    } finally {
+      if (!silent) setWaitlistLoading(false);
     }
   };
 
@@ -209,6 +227,13 @@ function Dashboard() {
             <span className="nav-icon">🤖</span>
             <span className="nav-text">Agent Usage</span>
           </button>
+          <button
+            className={`nav-item ${activeView === "waitlist" ? "active" : ""}`}
+            onClick={() => setActiveView("waitlist")}
+          >
+            <span className="nav-icon">📝</span>
+            <span className="nav-text">Waitlist</span>
+          </button>
           <div className="nav-divider"></div>
           <button
             className="nav-item nav-item-whatsapp"
@@ -235,6 +260,7 @@ function Dashboard() {
               {activeView === "users" && "👥 Users Management"}
               {activeView === "analytics" && "📈 Analytics"}
               {activeView === "agentUsage" && "🤖 Agent Usage"}
+              {activeView === "waitlist" && "📝 Waitlist"}
             </h1>
             <p className="header-subtitle">User Management Dashboard</p>
           </div>
@@ -564,6 +590,65 @@ function Dashboard() {
                               </tr>
                             );
                           })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeView === "waitlist" && (
+                <div className="view-content">
+                  {waitlistLoading && !waitlistEntries.length ? (
+                    <div className="loading">⏳ Loading waitlist...</div>
+                  ) : waitlistEntries.length === 0 ? (
+                    <div className="empty-state">
+                      <div className="empty-icon">📝</div>
+                      <p>No waitlist entries yet</p>
+                    </div>
+                  ) : (
+                    <div className="table-wrapper">
+                      <table className="users-table">
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Company</th>
+                            <th>Message</th>
+                            <th>Joined</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {waitlistEntries.map((entry) => (
+                            <tr key={entry._id}>
+                              <td>
+                                <div className="user-cell">
+                                  <div className="avatar">
+                                    {entry.name.charAt(0).toUpperCase()}
+                                  </div>
+                                  <span className="user-name">{entry.name}</span>
+                                </div>
+                              </td>
+                              <td className="email-cell">{entry.email}</td>
+                              <td>{entry.phone || "-"}</td>
+                              <td>{entry.company || "-"}</td>
+                              <td className="message-cell">
+                                {entry.message ? (
+                                  <span title={entry.message}>
+                                    {entry.message.length > 50
+                                      ? entry.message.substring(0, 50) + "..."
+                                      : entry.message}
+                                  </span>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                              <td className="date-cell">
+                                {formatDate(entry.createdAt)}
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>

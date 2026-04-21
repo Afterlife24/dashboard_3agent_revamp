@@ -33,8 +33,26 @@ function WhatsApp() {
     const fetchConversations = async () => {
         try {
             const response = await axios.get(`${WHATSAPP_API_URL}/conversations`)
-            setConversations(response.data)
+
+            // Sort conversations by last message time (most recent first)
+            const sortedConversations = response.data.sort((a, b) => {
+                const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0
+                const timeB = b.last_message_time ? new Date(b.last_message_time).getTime() : 0
+                return timeB - timeA // Descending order (newest first)
+            })
+
+            setConversations(sortedConversations)
             setIsConnected(true)
+
+            // Update selected conversation if it exists in the new data
+            if (selectedConversation) {
+                const updatedSelected = sortedConversations.find(
+                    conv => conv.phone_number === selectedConversation.phone_number
+                )
+                if (updatedSelected) {
+                    setSelectedConversation(updatedSelected)
+                }
+            }
         } catch (error) {
             console.error('Error fetching conversations:', error)
             setIsConnected(false)
@@ -60,12 +78,20 @@ function WhatsApp() {
     const handleTakeover = async (phoneNumber) => {
         try {
             await axios.post(`${WHATSAPP_API_URL}/takeover`, { phone_number: phoneNumber })
-            await fetchConversations()
-            await fetchMessages(phoneNumber)
+
+            // Immediately update the UI
             setSelectedConversation(prev => ({
                 ...prev,
                 human_takeover: true
             }))
+
+            // Fetch fresh data from server
+            await Promise.all([
+                fetchConversations(),
+                fetchMessages(phoneNumber)
+            ])
+
+            console.log('✅ Takeover successful, UI updated')
         } catch (error) {
             console.error('Error taking over:', error)
         }
@@ -74,12 +100,20 @@ function WhatsApp() {
     const handleRelease = async (phoneNumber) => {
         try {
             await axios.post(`${WHATSAPP_API_URL}/release`, { phone_number: phoneNumber })
-            await fetchConversations()
-            await fetchMessages(phoneNumber)
+
+            // Immediately update the UI
             setSelectedConversation(prev => ({
                 ...prev,
                 human_takeover: false
             }))
+
+            // Fetch fresh data from server
+            await Promise.all([
+                fetchConversations(),
+                fetchMessages(phoneNumber)
+            ])
+
+            console.log('✅ Release successful, UI updated')
         } catch (error) {
             console.error('Error releasing:', error)
         }
