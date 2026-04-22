@@ -6,6 +6,17 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
     const messagesEndRef = useRef(null)
     const messagesContainerRef = useRef(null)
 
+    // Debug: Log when conversation prop changes
+    useEffect(() => {
+        if (conversation) {
+            console.log('💬 ChatWindow updated:', {
+                phone: conversation.phone_number,
+                human_takeover: conversation.human_takeover,
+                timestamp: new Date().toISOString()
+            })
+        }
+    }, [conversation])
+
     // Scroll to bottom when messages change or conversation changes
     useEffect(() => {
         // Use setTimeout to ensure DOM is updated before scrolling

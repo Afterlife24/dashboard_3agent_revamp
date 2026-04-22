@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import ConversationsList from '../components/ConversationsList'
@@ -13,6 +13,90 @@ function WhatsApp() {
     const [selectedConversation, setSelectedConversation] = useState(null)
     const [messages, setMessages] = useState([])
     const [isConnected, setIsConnected] = useState(false)
+    const previousTakeoverStates = useRef(new Map())
+    const audioContextRef = useRef(null)
+    const audioUnlockedRef = useRef(false)
+
+    // Initialize audio context on first user interaction
+    const unlockAudio = () => {
+        if (!audioUnlockedRef.current) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+                audioContextRef.current = audioContext
+
+                // Resume context if suspended
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume()
+                }
+
+                audioUnlockedRef.current = true
+                console.log('🔊 Audio unlocked and ready')
+            } catch (error) {
+                console.error('Error unlocking audio:', error)
+            }
+        }
+    }
+
+    // Function to play notification sound
+    const playNotificationSound = () => {
+        try {
+            // Use existing audio context or create new one
+            const audioContext = audioContextRef.current || new (window.AudioContext || window.webkitAudioContext)()
+
+            // Resume if suspended
+            if (audioContext.state === 'suspended') {
+                audioContext.resume()
+            }
+
+            // Create iPhone tri-tone notification sound
+            const playTone = (frequency, startTime, duration) => {
+                const oscillator = audioContext.createOscillator()
+                const gainNode = audioContext.createGain()
+
+                oscillator.connect(gainNode)
+                gainNode.connect(audioContext.destination)
+
+                oscillator.frequency.value = frequency
+                oscillator.type = 'sine'
+
+                // Smooth attack and decay
+                gainNode.gain.setValueAtTime(0, startTime)
+                gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.02)
+                gainNode.gain.linearRampToValueAtTime(0, startTime + duration)
+
+                oscillator.start(startTime)
+                oscillator.stop(startTime + duration)
+            }
+
+            // iPhone tri-tone: three ascending notes
+            const now = audioContext.currentTime
+            playTone(1108, now, 0.15)           // C6
+            playTone(1319, now + 0.08, 0.15)    // E6
+            playTone(1568, now + 0.16, 0.4)     // G6
+
+            console.log('🔔 iPhone notification sound played')
+        } catch (error) {
+            console.error('Error playing notification sound:', error)
+        }
+    }
+
+    // Unlock audio on any user interaction
+    useEffect(() => {
+        const handleInteraction = () => {
+            unlockAudio()
+        }
+
+        // Listen for various user interactions
+        document.addEventListener('click', handleInteraction)
+        document.addEventListener('keydown', handleInteraction)
+        document.addEventListener('touchstart', handleInteraction)
+
+        return () => {
+            document.removeEventListener('click', handleInteraction)
+            document.removeEventListener('keydown', handleInteraction)
+            document.removeEventListener('touchstart', handleInteraction)
+        }
+    }, [])
 
     useEffect(() => {
         fetchConversations()
@@ -41,16 +125,41 @@ function WhatsApp() {
                 return timeB - timeA // Descending order (newest first)
             })
 
+            // Check for takeover state changes and play notification
+            sortedConversations.forEach(conv => {
+                const previousState = previousTakeoverStates.current.get(conv.phone_number)
+                const currentState = conv.human_takeover
+
+                // If takeover just happened (changed from false/undefined to true)
+                if (previousState === false && currentState === true) {
+                    console.log('🔔 Human takeover detected for:', conv.phone_number)
+                    playNotificationSound()
+                }
+
+                // Update the state
+                previousTakeoverStates.current.set(conv.phone_number, currentState)
+            })
+
             setConversations(sortedConversations)
             setIsConnected(true)
 
-            // Update selected conversation if it exists in the new data
+            // CRITICAL: Always update selected conversation to sync the chat window
             if (selectedConversation) {
                 const updatedSelected = sortedConversations.find(
                     conv => conv.phone_number === selectedConversation.phone_number
                 )
                 if (updatedSelected) {
+                    // Force update even if the object looks the same
                     setSelectedConversation(updatedSelected)
+
+                    // Log if takeover state changed
+                    if (selectedConversation.human_takeover !== updatedSelected.human_takeover) {
+                        console.log('🔄 Takeover state changed:', {
+                            phone: updatedSelected.phone_number,
+                            old: selectedConversation.human_takeover,
+                            new: updatedSelected.human_takeover
+                        })
+                    }
                 }
             }
         } catch (error) {
@@ -172,6 +281,7 @@ function WhatsApp() {
                     onSelectConversation={setSelectedConversation}
                 />
                 <ChatWindow
+                    key={selectedConversation ? `${selectedConversation.phone_number}-${selectedConversation.human_takeover}` : 'no-conversation'}
                     conversation={selectedConversation}
                     messages={messages}
                     onTakeover={handleTakeover}
