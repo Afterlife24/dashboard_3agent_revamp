@@ -64,6 +64,14 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
 
     const isHumanMode = conversation.human_takeover
 
+    // Debug logging
+    console.log('🔍 ChatWindow render:', {
+        phone: conversation.phone_number,
+        human_takeover: conversation.human_takeover,
+        isHumanMode: isHumanMode,
+        timestamp: new Date().toISOString()
+    })
+
     return (
         <div className="chat-panel">
             <div className="chat-header">

@@ -118,6 +118,8 @@ function WhatsApp() {
         try {
             const response = await axios.get(`${WHATSAPP_API_URL}/conversations`)
 
+            console.log('📥 Fetched conversations:', response.data)
+
             // Sort conversations by last message time (most recent first)
             const sortedConversations = response.data.sort((a, b) => {
                 const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0
@@ -149,9 +151,6 @@ function WhatsApp() {
                     conv => conv.phone_number === selectedConversation.phone_number
                 )
                 if (updatedSelected) {
-                    // Force update even if the object looks the same
-                    setSelectedConversation(updatedSelected)
-
                     // Log if takeover state changed
                     if (selectedConversation.human_takeover !== updatedSelected.human_takeover) {
                         console.log('🔄 Takeover state changed:', {
@@ -160,6 +159,9 @@ function WhatsApp() {
                             new: updatedSelected.human_takeover
                         })
                     }
+
+                    // Force update with a new object reference to trigger React re-render
+                    setSelectedConversation({ ...updatedSelected })
                 }
             }
         } catch (error) {
