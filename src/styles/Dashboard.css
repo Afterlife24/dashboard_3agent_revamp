@@ -674,13 +674,30 @@ body {
 }
 
 /* Responsive Design */
+
+/* Desktop - ensure original sizes */
+@media (min-width: 1025px) {
+    .sidebar {
+        width: 280px;
+    }
+
+    .content-header {
+        padding: 2rem 2.5rem;
+    }
+
+    .content-area {
+        padding: 2rem 2.5rem;
+    }
+}
+
 @media (max-width: 1200px) {
     .charts-row {
         grid-template-columns: 1fr;
     }
 }
 
-@media (max-width: 768px) {
+/* Tablet only - don't change desktop */
+@media (max-width: 1024px) and (min-width: 769px) {
     .sidebar {
         width: 240px;
     }
@@ -735,6 +752,7 @@ body {
    MOBILE RESPONSIVE STYLES - BOTTOM NAV
    ============================================ */
 
+/* Mobile and small tablets only */
 @media (max-width: 768px) {
     .dashboard-layout {
         flex-direction: column;
