@@ -7,6 +7,16 @@
     overflow: hidden;
 }
 
+/* Hide scrollbars */
+.whatsapp-container::-webkit-scrollbar {
+    display: none;
+}
+
+.whatsapp-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
 /* Header */
 .whatsapp-header {
     position: relative;
@@ -34,6 +44,7 @@
     align-items: center;
     justify-content: center;
     color: white;
+    flex-shrink: 0;
 }
 
 .whatsapp-icon svg {
@@ -123,6 +134,16 @@
     background: #111b21;
 }
 
+/* Hide scrollbars globally for WhatsApp page */
+.whatsapp-content::-webkit-scrollbar {
+    display: none;
+}
+
+.whatsapp-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
 /* Back Button */
 .back-button {
     display: flex;
@@ -147,4 +168,125 @@
 
 .back-button:hover {
     background: #374248;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+    .header-title p {
+        display: none;
+    }
+
+    .stats-label {
+        font-size: 0.65rem;
+    }
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+    .whatsapp-container {
+        width: 100vw;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .whatsapp-content {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .whatsapp-header {
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+    }
+
+    .header-left {
+        gap: 0.75rem;
+    }
+
+    .whatsapp-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .whatsapp-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .header-title h1 {
+        font-size: 1rem;
+    }
+
+    .header-right {
+        gap: 0.5rem;
+    }
+
+    .connection-status {
+        padding: 0.4rem 0.75rem;
+    }
+
+    .status-text {
+        font-size: 0.75rem;
+    }
+
+    .stats-badge {
+        padding: 0.4rem 0.75rem;
+    }
+
+    .stats-number {
+        font-size: 1rem;
+    }
+
+    .stats-label {
+        font-size: 0.6rem;
+    }
+
+    .back-button {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+        margin-right: 0.5rem;
+    }
+
+    .back-button svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .whatsapp-header {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .header-title h1 {
+        font-size: 0.9rem;
+    }
+
+    .connection-status,
+    .stats-badge {
+        padding: 0.3rem 0.5rem;
+    }
+
+    .status-text {
+        display: none;
+    }
+
+    .stats-label {
+        display: none;
+    }
+
+    .back-button span {
+        display: none;
+    }
+
+    .back-button {
+        padding: 0.5rem;
+        margin-right: 0.25rem;
+    }
 }

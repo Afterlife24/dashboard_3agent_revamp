@@ -92,20 +92,23 @@
 
 .mode-badge {
     padding: 0.25rem 0.5rem;
-    border-radius: 12px;
+    border-radius: 4px;
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .mode-badge.ai {
-    background: #1f4d36;
+    background: rgba(37, 211, 102, 0.15);
     color: #25d366;
+    border: 1px solid rgba(37, 211, 102, 0.3);
 }
 
 .mode-badge.human {
-    background: #5c3b2e;
+    background: rgba(255, 152, 0, 0.15);
     color: #ff9800;
+    border: 1px solid rgba(255, 152, 0, 0.3);
 }
 
 .last-message {
@@ -121,4 +124,70 @@
 .timestamp {
     font-size: 0.75rem;
     color: #667781;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+/* Mobile: Hide conversations panel when chat is open */
+@media (max-width: 768px) {
+    .conversations-panel {
+        width: 100%;
+        border-right: none;
+    }
+
+    /* Hide conversations when chat is selected */
+    .whatsapp-content.chat-active .conversations-panel {
+        display: none;
+    }
+
+    .conversations-panel h2 {
+        padding: 1rem 1.25rem;
+        font-size: 1.25rem;
+    }
+
+    .search-box {
+        margin: 0.5rem 1rem;
+        padding: 0.5rem 0.875rem;
+        font-size: 0.875rem;
+    }
+
+    .conversation-item {
+        padding: 0.625rem 1rem;
+    }
+
+    .phone-number {
+        font-size: 0.9375rem;
+    }
+
+    .mode-badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+    }
+
+    .last-message {
+        font-size: 0.8125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .conversations-panel h2 {
+        padding: 0.875rem 1rem;
+        font-size: 1.125rem;
+    }
+
+    .search-box {
+        margin: 0.5rem 0.75rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    .conversation-item {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .phone-number {
+        font-size: 0.875rem;
+    }
 }

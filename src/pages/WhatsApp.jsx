@@ -242,6 +242,10 @@ function WhatsApp() {
         }
     }
 
+    const handleBackToConversations = () => {
+        setSelectedConversation(null)
+    }
+
     return (
         <div className="whatsapp-container">
             {/* Header */}
@@ -276,7 +280,7 @@ function WhatsApp() {
             </div>
 
             {/* Main Content */}
-            <div className="whatsapp-content">
+            <div className={`whatsapp-content ${selectedConversation ? 'chat-active' : ''}`}>
                 <ConversationsList
                     conversations={conversations}
                     selectedConversation={selectedConversation}
@@ -289,6 +293,7 @@ function WhatsApp() {
                     onTakeover={handleTakeover}
                     onRelease={handleRelease}
                     onSendMessage={handleSendMessage}
+                    onBack={handleBackToConversations}
                 />
             </div>
         </div>

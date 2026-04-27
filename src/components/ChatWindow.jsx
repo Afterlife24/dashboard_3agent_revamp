@@ -1,10 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import './ChatWindow.css'
 
-function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessage }) {
+function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessage, onBack }) {
     const [messageInput, setMessageInput] = useState('')
     const messagesEndRef = useRef(null)
     const messagesContainerRef = useRef(null)
+
+    // Handle mobile back button
+    const handleMobileBack = () => {
+        if (onBack) {
+            onBack()
+        }
+    }
 
     // Debug: Log when conversation prop changes
     useEffect(() => {
@@ -64,6 +71,9 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
 
     const isHumanMode = conversation.human_takeover
 
+    // Clean phone number - remove "whatsapp:" prefix
+    const cleanPhoneNumber = conversation.phone_number.replace('whatsapp:', '')
+
     // Debug logging
     console.log('🔍 ChatWindow render:', {
         phone: conversation.phone_number,
@@ -75,10 +85,15 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
     return (
         <div className="chat-panel">
             <div className="chat-header">
+                <button className="chat-back-button" onClick={handleMobileBack} aria-label="Back to conversations">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                </button>
                 <div className="chat-user-info">
-                    <h3>{conversation.phone_number}</h3>
+                    <h3>{cleanPhoneNumber}</h3>
                     <span className={`mode-badge ${isHumanMode ? 'human' : 'ai'}`}>
-                        {isHumanMode ? 'Human Mode' : 'AI Mode'}
+                        {isHumanMode ? 'HUMAN' : 'AI'}
                     </span>
                 </div>
                 <div className="chat-controls">
@@ -94,7 +109,7 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
                             className="btn btn-secondary"
                             onClick={() => onRelease(conversation.phone_number)}
                         >
-                            Release to AI
+                            Release
                         </button>
                     )}
                 </div>

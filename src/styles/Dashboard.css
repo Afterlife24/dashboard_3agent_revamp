@@ -729,3 +729,267 @@ body {
     font-size: 1.125rem;
     color: rgba(255, 255, 255, 0.6);
 }
+
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES - BOTTOM NAV
+   ============================================ */
+
+@media (max-width: 768px) {
+    .dashboard-layout {
+        flex-direction: column;
+        padding-bottom: 70px;
+        /* Space for bottom nav */
+    }
+
+    /* Hide sidebar on mobile */
+    .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-top: 1px solid rgba(100, 181, 246, 0.2);
+        background: rgba(15, 25, 45, 0.95);
+        backdrop-filter: blur(30px);
+        z-index: 1000;
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .sidebar-header,
+    .sidebar-footer {
+        display: none;
+    }
+
+    .sidebar-nav {
+        flex-direction: row;
+        padding: 0.5rem 0.25rem;
+        gap: 0;
+        overflow-x: visible;
+        overflow-y: hidden;
+        justify-content: space-evenly;
+        align-items: center;
+    }
+
+    .sidebar-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Remove padding element */
+    .sidebar-nav::after {
+        display: none;
+    }
+
+    .nav-item {
+        flex-direction: column;
+        padding: 0.5rem 0.25rem;
+        gap: 0.25rem;
+        min-width: 0;
+        flex: 1;
+        flex-shrink: 1;
+        border-radius: 8px;
+        margin-right: 0;
+    }
+
+    .nav-item:last-child {
+        margin-right: 0;
+    }
+
+    /* Extra margin for last item */
+}
+
+.nav-item::before {
+    display: none;
+}
+
+.nav-item:hover {
+    transform: none;
+}
+
+.nav-icon {
+    font-size: 1.5rem;
+    width: auto;
+    height: auto;
+}
+
+.nav-text {
+    font-size: 0.65rem;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.nav-divider {
+    display: none;
+}
+
+.nav-item-whatsapp {
+    margin-top: 0;
+}
+
+/* Main container adjustments */
+.main-container {
+    width: 100%;
+}
+
+.content-header {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.content-header h1 {
+    font-size: 1.25rem;
+}
+
+.header-subtitle {
+    font-size: 0.75rem;
+}
+
+.header-actions {
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.refresh-btn,
+.export-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+}
+
+.content-area {
+    padding: 1rem;
+}
+
+/* Stats cards */
+.stats-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.stat-card {
+    padding: 1.25rem;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+}
+
+/* Charts */
+.charts-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.chart-card,
+.chart-card-full {
+    padding: 1.25rem;
+}
+
+/* Table */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.users-table {
+    min-width: 800px;
+}
+
+.users-table th,
+.users-table td {
+    padding: 0.875rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.875rem;
+}
+}
+
+@media (max-width: 480px) {
+    .dashboard-layout {
+        padding-bottom: 65px;
+    }
+
+    .content-header h1 {
+        font-size: 1.125rem;
+    }
+
+    .header-actions {
+        gap: 0.5rem;
+    }
+
+    .refresh-btn,
+    .export-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .content-area {
+        padding: 0.75rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        font-size: 1.75rem;
+        width: 45px;
+        height: 45px;
+    }
+
+    .stat-info h3 {
+        font-size: 0.75rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .chart-card,
+    .chart-card-full {
+        padding: 1rem;
+    }
+
+    .chart-card h3,
+    .chart-card-full h3 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .nav-item {
+        min-width: 60px;
+        padding: 0.5rem 0.375rem;
+    }
+
+    .nav-icon {
+        font-size: 1.25rem;
+    }
+
+    .nav-text {
+        font-size: 0.6rem;
+    }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .sidebar-nav {
+        padding: 0.375rem 0.5rem;
+    }
+
+    .nav-item {
+        padding: 0.5rem 0.375rem;
+    }
+}
