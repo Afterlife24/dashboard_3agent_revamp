@@ -51,15 +51,19 @@ function Dashboard() {
   const [agentLoading, setAgentLoading] = useState(false);
   const [waitlistEntries, setWaitlistEntries] = useState([]);
   const [waitlistLoading, setWaitlistLoading] = useState(false);
+  const [companyDetails, setCompanyDetails] = useState([]);
+  const [companyLoading, setCompanyLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
     fetchAgentUsage();
     fetchWaitlist();
+    fetchCompanyDetails();
     const interval = setInterval(() => {
       fetchUsers(true);
       fetchAgentUsage(true);
       fetchWaitlist(true);
+      fetchCompanyDetails(true);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -112,6 +116,20 @@ function Dashboard() {
     }
   };
 
+  const fetchCompanyDetails = async (silent = false) => {
+    try {
+      if (!silent) setCompanyLoading(true);
+      const response = await axios.get(`${API_URL}/api/company-details/all`);
+      if (response.data.success) {
+        setCompanyDetails(response.data.data);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch company details:", err.message);
+    } finally {
+      if (!silent) setCompanyLoading(false);
+    }
+  };
+
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
@@ -152,6 +170,51 @@ function Dashboard() {
 
     // Generate filename with current date
     const fileName = `users_export_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+    // Save file
+    XLSX.writeFile(wb, fileName);
+  };
+
+  const exportCompanyDetails = () => {
+    // Prepare data for export
+    const exportData = companyDetails.map((company) => ({
+      "Company Name": company.companyName,
+      Industry: company.industry,
+      "Company Size": company.companySize,
+      Website: company.website || "-",
+      Country: company.country,
+      "Phone Number": company.phoneNumber,
+      Address: company.address || "-",
+      Description: company.description || "-",
+      "User Name": company.userId?.name || "-",
+      "User Email": company.userId?.email || "-",
+      "Submitted Date": new Date(company.createdAt).toLocaleString(),
+    }));
+
+    // Create worksheet
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Set column widths
+    ws["!cols"] = [
+      { wch: 25 }, // Company Name
+      { wch: 20 }, // Industry
+      { wch: 15 }, // Company Size
+      { wch: 30 }, // Website
+      { wch: 15 }, // Country
+      { wch: 18 }, // Phone Number
+      { wch: 35 }, // Address
+      { wch: 40 }, // Description
+      { wch: 20 }, // User Name
+      { wch: 30 }, // User Email
+      { wch: 20 }, // Submitted Date
+    ];
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Company Details");
+
+    // Generate filename with current date
+    const fileName = `company_details_export_${new Date().toISOString().split("T")[0]}.xlsx`;
 
     // Save file
     XLSX.writeFile(wb, fileName);
@@ -234,6 +297,13 @@ function Dashboard() {
             <span className="nav-icon">📝</span>
             <span className="nav-text">Waitlist</span>
           </button>
+          <button
+            className={`nav-item ${activeView === "companyDetails" ? "active" : ""}`}
+            onClick={() => setActiveView("companyDetails")}
+          >
+            <span className="nav-icon">🏢</span>
+            <span className="nav-text">Companies</span>
+          </button>
           <div className="nav-divider"></div>
           <button
             className="nav-item nav-item-whatsapp"
@@ -261,12 +331,18 @@ function Dashboard() {
               {activeView === "analytics" && "📈 Analytics"}
               {activeView === "agentUsage" && "🤖 Agent Usage"}
               {activeView === "waitlist" && "📝 Waitlist"}
+              {activeView === "companyDetails" && "🏢 Company Details"}
             </h1>
             <p className="header-subtitle">User Management Dashboard</p>
           </div>
           <div className="header-actions">
             {activeView === "users" && (
               <button onClick={exportToExcel} className="export-btn">
+                📥 Export Excel
+              </button>
+            )}
+            {activeView === "companyDetails" && (
+              <button onClick={exportCompanyDetails} className="export-btn">
                 📥 Export Excel
               </button>
             )}
@@ -646,6 +722,74 @@ function Dashboard() {
                               </td>
                               <td className="date-cell">
                                 {formatDate(entry.createdAt)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeView === "companyDetails" && (
+                <div className="view-content">
+                  {companyLoading && !companyDetails.length ? (
+                    <div className="loading">⏳ Loading company details...</div>
+                  ) : companyDetails.length === 0 ? (
+                    <div className="empty-state">
+                      <div className="empty-icon">🏢</div>
+                      <p>No company details submitted yet</p>
+                    </div>
+                  ) : (
+                    <div className="table-wrapper">
+                      <table className="users-table">
+                        <thead>
+                          <tr>
+                            <th>Company Name</th>
+                            <th>Industry</th>
+                            <th>Size</th>
+                            <th>Country</th>
+                            <th>Phone</th>
+                            <th>Website</th>
+                            <th>User</th>
+                            <th>Submitted</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {companyDetails.map((company) => (
+                            <tr key={company._id}>
+                              <td>
+                                <div className="user-cell">
+                                  <div className="avatar">
+                                    {company.companyName.charAt(0).toUpperCase()}
+                                  </div>
+                                  <span className="user-name">{company.companyName}</span>
+                                </div>
+                              </td>
+                              <td>{company.industry}</td>
+                              <td>{company.companySize}</td>
+                              <td>{company.country}</td>
+                              <td>{company.phoneNumber}</td>
+                              <td className="email-cell">
+                                {company.website ? (
+                                  <a href={company.website} target="_blank" rel="noopener noreferrer">
+                                    {company.website}
+                                  </a>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                              <td>
+                                <div className="user-info-cell">
+                                  <div>{company.userId?.name || "-"}</div>
+                                  <div className="email-cell" style={{ fontSize: "0.85rem", opacity: 0.7 }}>
+                                    {company.userId?.email || "-"}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="date-cell">
+                                {formatDate(company.createdAt)}
                               </td>
                             </tr>
                           ))}
