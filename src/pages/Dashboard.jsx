@@ -627,66 +627,174 @@ function Dashboard() {
                     <div className="loading">⏳ Loading agent usage...</div>
                   ) : (
                     <>
-                      {/* Activity Feed - All Individual Logs */}
+                      {/* Activity Feed - Grouped by User in Grid */}
                       <div style={{ marginBottom: "2rem" }}>
                         <h3 style={{ marginBottom: "1rem", color: "#fff", fontSize: "1.2rem" }}>
-                          📊 All Activity Logs
+                          📊 Activity Logs by User
                         </h3>
                         <div style={{
-                          background: "rgba(255, 255, 255, 0.05)",
-                          borderRadius: "12px",
-                          padding: "1rem",
-                          maxHeight: "500px",
-                          overflowY: "auto"
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                          gap: "1rem",
+                          maxHeight: "600px",
+                          overflowY: "auto",
+                          padding: "0.5rem"
                         }}>
                           {agentUsage.allLogs && agentUsage.allLogs.length > 0 ? (
-                            agentUsage.allLogs.map((activity, index) => {
-                              const actionText =
-                                activity.agentType === "web" ? "opened the Web Agent" :
-                                  activity.agentType === "calling" ? "clicked Call Me button" :
-                                    "clicked Get Demo button in WhatsApp";
+                            (() => {
+                              // Group logs by user email
+                              const groupedLogs = {};
+                              agentUsage.allLogs.forEach(log => {
+                                if (!groupedLogs[log.userEmail]) {
+                                  groupedLogs[log.userEmail] = [];
+                                }
+                                groupedLogs[log.userEmail].push(log);
+                              });
 
-                              const icon =
-                                activity.agentType === "web" ? "🌐" :
-                                  activity.agentType === "calling" ? "📞" :
-                                    "💬";
-
-                              const timeAgo = new Date(activity.createdAt).toLocaleString();
-
-                              return (
+                              return Object.entries(groupedLogs).map(([email, logs]) => (
                                 <div
-                                  key={activity._id || index}
+                                  key={email}
                                   style={{
                                     background: "rgba(255, 255, 255, 0.08)",
-                                    borderRadius: "8px",
-                                    padding: "0.75rem 1rem",
-                                    marginBottom: "0.5rem",
-                                    borderLeft: `3px solid ${activity.agentType === "web" ? COLORS.web :
-                                        activity.agentType === "calling" ? COLORS.calling :
-                                          COLORS.whatsapp
-                                      }`
+                                    borderRadius: "12px",
+                                    padding: "1rem",
+                                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    height: "fit-content"
                                   }}
                                 >
-                                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-                                    <span style={{ fontSize: "1.2rem" }}>{icon}</span>
-                                    <span style={{ color: "#fff", fontSize: "0.95rem" }}>
-                                      <strong style={{ color: "#4fc3f7" }}>{activity.userEmail}</strong>
-                                      {" "}{actionText}
-                                    </span>
-                                  </div>
+                                  {/* User Header */}
                                   <div style={{
-                                    fontSize: "0.75rem",
-                                    color: "rgba(255, 255, 255, 0.5)",
-                                    marginTop: "0.25rem",
-                                    marginLeft: "2rem"
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "0.75rem",
+                                    marginBottom: "0.75rem",
+                                    paddingBottom: "0.75rem",
+                                    borderBottom: "1px solid rgba(255, 255, 255, 0.1)"
                                   }}>
-                                    {timeAgo}
+                                    <div style={{
+                                      width: "40px",
+                                      height: "40px",
+                                      borderRadius: "50%",
+                                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      color: "#fff",
+                                      fontWeight: "bold",
+                                      fontSize: "1rem",
+                                      flexShrink: 0
+                                    }}>
+                                      {email.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{
+                                        color: "#4fc3f7",
+                                        fontWeight: "bold",
+                                        fontSize: "0.9rem",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap"
+                                      }}>
+                                        {email}
+                                      </div>
+                                      <div style={{
+                                        color: "rgba(255, 255, 255, 0.5)",
+                                        fontSize: "0.75rem",
+                                        marginTop: "0.15rem"
+                                      }}>
+                                        {logs.length} {logs.length === 1 ? 'action' : 'actions'}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* User's Activity Logs */}
+                                  <div style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "0.5rem",
+                                    maxHeight: "300px",
+                                    overflowY: "auto"
+                                  }}>
+                                    {logs.map((activity, index) => {
+                                      const actionText =
+                                        activity.agentType === "web" ? "Web Agent" :
+                                          activity.agentType === "calling" ? "Call Me" :
+                                            "WhatsApp Demo";
+
+                                      const icon =
+                                        activity.agentType === "web" ? "🌐" :
+                                          activity.agentType === "calling" ? "📞" :
+                                            "💬";
+
+                                      const timeAgo = new Date(activity.createdAt).toLocaleString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      });
+
+                                      return (
+                                        <div
+                                          key={activity._id || index}
+                                          style={{
+                                            background: "rgba(255, 255, 255, 0.05)",
+                                            borderRadius: "8px",
+                                            padding: "0.65rem",
+                                            borderLeft: `3px solid ${activity.agentType === "web" ? COLORS.web :
+                                              activity.agentType === "calling" ? COLORS.calling :
+                                                COLORS.whatsapp
+                                              }`,
+                                            transition: "all 0.2s ease",
+                                            cursor: "default"
+                                          }}
+                                          onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                                          }}
+                                          onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                                          }}
+                                        >
+                                          <div style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "0.5rem",
+                                            marginBottom: "0.35rem"
+                                          }}>
+                                            <span style={{ fontSize: "1.1rem" }}>{icon}</span>
+                                            <span style={{
+                                              color: "#fff",
+                                              fontSize: "0.85rem",
+                                              fontWeight: "500",
+                                              flex: 1
+                                            }}>
+                                              {actionText}
+                                            </span>
+                                          </div>
+                                          <div style={{
+                                            fontSize: "0.7rem",
+                                            color: "rgba(255, 255, 255, 0.4)",
+                                            marginLeft: "1.6rem"
+                                          }}>
+                                            {timeAgo}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 </div>
-                              );
-                            })
+                              ));
+                            })()
                           ) : (
-                            <div style={{ textAlign: "center", color: "rgba(255, 255, 255, 0.5)", padding: "2rem" }}>
+                            <div style={{
+                              gridColumn: "1 / -1",
+                              textAlign: "center",
+                              color: "rgba(255, 255, 255, 0.5)",
+                              padding: "3rem",
+                              background: "rgba(255, 255, 255, 0.05)",
+                              borderRadius: "12px"
+                            }}>
                               No activity yet
                             </div>
                           )}
@@ -790,156 +898,136 @@ function Dashboard() {
                   )}
                 </div>
               )}
-              className="stat-value"
-              style={{ color: COLORS.whatsapp }}
-                                  >
-              {whatsappCount}
-            </span>
-        </td>
-        <td>
-          <span className="stat-value">{total}</span>
-        </td>
-      </tr>
-      );
-                          })}
-    </tbody>
-                      </table >
-                    </div >
-                  )
-}
-                </div >
-              )}
 
-{
-  activeView === "waitlist" && (
-    <div className="view-content">
-      {waitlistLoading && !waitlistEntries.length ? (
-        <div className="loading">⏳ Loading waitlist...</div>
-      ) : waitlistEntries.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">📝</div>
-          <p>No waitlist entries yet</p>
-        </div>
-      ) : (
-        <div className="table-wrapper">
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Company</th>
-                <th>Message</th>
-                <th>Joined</th>
-              </tr>
-            </thead>
-            <tbody>
-              {waitlistEntries.map((entry) => (
-                <tr key={entry._id}>
-                  <td>
-                    <div className="user-cell">
-                      <div className="avatar">
-                        {entry.name.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="user-name">{entry.name}</span>
+              {activeView === "waitlist" && (
+                <div className="view-content">
+                  {waitlistLoading && !waitlistEntries.length ? (
+                    <div className="loading">⏳ Loading waitlist...</div>
+                  ) : waitlistEntries.length === 0 ? (
+                    <div className="empty-state">
+                      <div className="empty-icon">📝</div>
+                      <p>No waitlist entries yet</p>
                     </div>
-                  </td>
-                  <td className="email-cell">{entry.email}</td>
-                  <td>{entry.phone || "-"}</td>
-                  <td>{entry.company || "-"}</td>
-                  <td className="message-cell">
-                    {entry.message ? (
-                      <span title={entry.message}>
-                        {entry.message.length > 50
-                          ? entry.message.substring(0, 50) + "..."
-                          : entry.message}
-                      </span>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
-                  <td className="date-cell">
-                    {formatDate(entry.createdAt)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  )
-}
+                  ) : (
+                    <div className="table-wrapper">
+                      <table className="users-table">
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Company</th>
+                            <th>Message</th>
+                            <th>Joined</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {waitlistEntries.map((entry) => (
+                            <tr key={entry._id}>
+                              <td>
+                                <div className="user-cell">
+                                  <div className="avatar">
+                                    {entry.name.charAt(0).toUpperCase()}
+                                  </div>
+                                  <span className="user-name">{entry.name}</span>
+                                </div>
+                              </td>
+                              <td className="email-cell">{entry.email}</td>
+                              <td>{entry.phone || "-"}</td>
+                              <td>{entry.company || "-"}</td>
+                              <td className="message-cell">
+                                {entry.message ? (
+                                  <span title={entry.message}>
+                                    {entry.message.length > 50
+                                      ? entry.message.substring(0, 50) + "..."
+                                      : entry.message}
+                                  </span>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                              <td className="date-cell">
+                                {formatDate(entry.createdAt)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )
+              }
 
-{
-  activeView === "companyDetails" && (
-    <div className="view-content">
-      {companyLoading && !companyDetails.length ? (
-        <div className="loading">⏳ Loading company details...</div>
-      ) : companyDetails.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🏢</div>
-          <p>No company details submitted yet</p>
-        </div>
-      ) : (
-        <div className="table-wrapper">
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Company Name</th>
-                <th>Industry</th>
-                <th>Size</th>
-                <th>Country</th>
-                <th>Phone</th>
-                <th>Website</th>
-                <th>User</th>
-                <th>Submitted</th>
-              </tr>
-            </thead>
-            <tbody>
-              {companyDetails.map((company) => (
-                <tr key={company._id}>
-                  <td>
-                    <div className="user-cell">
-                      <div className="avatar">
-                        {company.companyName.charAt(0).toUpperCase()}
+              {
+                activeView === "companyDetails" && (
+                  <div className="view-content">
+                    {companyLoading && !companyDetails.length ? (
+                      <div className="loading">⏳ Loading company details...</div>
+                    ) : companyDetails.length === 0 ? (
+                      <div className="empty-state">
+                        <div className="empty-icon">🏢</div>
+                        <p>No company details submitted yet</p>
                       </div>
-                      <span className="user-name">{company.companyName}</span>
-                    </div>
-                  </td>
-                  <td>{company.industry}</td>
-                  <td>{company.companySize}</td>
-                  <td>{company.country}</td>
-                  <td>{company.phoneNumber}</td>
-                  <td className="email-cell">
-                    {company.website ? (
-                      <a href={company.website} target="_blank" rel="noopener noreferrer">
-                        {company.website}
-                      </a>
                     ) : (
-                      "-"
-                    )}
-                  </td>
-                  <td>
-                    <div className="user-info-cell">
-                      <div>{company.userId?.name || "-"}</div>
-                      <div className="email-cell" style={{ fontSize: "0.85rem", opacity: 0.7 }}>
-                        {company.userId?.email || "-"}
+                      <div className="table-wrapper">
+                        <table className="users-table">
+                          <thead>
+                            <tr>
+                              <th>Company Name</th>
+                              <th>Industry</th>
+                              <th>Size</th>
+                              <th>Country</th>
+                              <th>Phone</th>
+                              <th>Website</th>
+                              <th>User</th>
+                              <th>Submitted</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {companyDetails.map((company) => (
+                              <tr key={company._id}>
+                                <td>
+                                  <div className="user-cell">
+                                    <div className="avatar">
+                                      {company.companyName.charAt(0).toUpperCase()}
+                                    </div>
+                                    <span className="user-name">{company.companyName}</span>
+                                  </div>
+                                </td>
+                                <td>{company.industry}</td>
+                                <td>{company.companySize}</td>
+                                <td>{company.country}</td>
+                                <td>{company.phoneNumber}</td>
+                                <td className="email-cell">
+                                  {company.website ? (
+                                    <a href={company.website} target="_blank" rel="noopener noreferrer">
+                                      {company.website}
+                                    </a>
+                                  ) : (
+                                    "-"
+                                  )}
+                                </td>
+                                <td>
+                                  <div className="user-info-cell">
+                                    <div>{company.userId?.name || "-"}</div>
+                                    <div className="email-cell" style={{ fontSize: "0.85rem", opacity: 0.7 }}>
+                                      {company.userId?.email || "-"}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="date-cell">
+                                  {formatDate(company.createdAt)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                    </div>
-                  </td>
-                  <td className="date-cell">
-                    {formatDate(company.createdAt)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  )
-}
+                    )}
+                  </div>
+                )
+              }
             </>
           )}
         </div >
