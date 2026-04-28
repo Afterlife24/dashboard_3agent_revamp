@@ -13,90 +13,6 @@ function WhatsApp() {
     const [selectedConversation, setSelectedConversation] = useState(null)
     const [messages, setMessages] = useState([])
     const [isConnected, setIsConnected] = useState(false)
-    const previousTakeoverStates = useRef(new Map())
-    const audioContextRef = useRef(null)
-    const audioUnlockedRef = useRef(false)
-
-    // Initialize audio context on first user interaction
-    const unlockAudio = () => {
-        if (!audioUnlockedRef.current) {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)()
-                audioContextRef.current = audioContext
-
-                // Resume context if suspended
-                if (audioContext.state === 'suspended') {
-                    audioContext.resume()
-                }
-
-                audioUnlockedRef.current = true
-                console.log('🔊 Audio unlocked and ready')
-            } catch (error) {
-                console.error('Error unlocking audio:', error)
-            }
-        }
-    }
-
-    // Function to play notification sound
-    const playNotificationSound = () => {
-        try {
-            // Use existing audio context or create new one
-            const audioContext = audioContextRef.current || new (window.AudioContext || window.webkitAudioContext)()
-
-            // Resume if suspended
-            if (audioContext.state === 'suspended') {
-                audioContext.resume()
-            }
-
-            // Create iPhone tri-tone notification sound
-            const playTone = (frequency, startTime, duration) => {
-                const oscillator = audioContext.createOscillator()
-                const gainNode = audioContext.createGain()
-
-                oscillator.connect(gainNode)
-                gainNode.connect(audioContext.destination)
-
-                oscillator.frequency.value = frequency
-                oscillator.type = 'sine'
-
-                // Smooth attack and decay
-                gainNode.gain.setValueAtTime(0, startTime)
-                gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.02)
-                gainNode.gain.linearRampToValueAtTime(0, startTime + duration)
-
-                oscillator.start(startTime)
-                oscillator.stop(startTime + duration)
-            }
-
-            // iPhone tri-tone: three ascending notes
-            const now = audioContext.currentTime
-            playTone(1108, now, 0.15)           // C6
-            playTone(1319, now + 0.08, 0.15)    // E6
-            playTone(1568, now + 0.16, 0.4)     // G6
-
-            console.log('🔔 iPhone notification sound played')
-        } catch (error) {
-            console.error('Error playing notification sound:', error)
-        }
-    }
-
-    // Unlock audio on any user interaction
-    useEffect(() => {
-        const handleInteraction = () => {
-            unlockAudio()
-        }
-
-        // Listen for various user interactions
-        document.addEventListener('click', handleInteraction)
-        document.addEventListener('keydown', handleInteraction)
-        document.addEventListener('touchstart', handleInteraction)
-
-        return () => {
-            document.removeEventListener('click', handleInteraction)
-            document.removeEventListener('keydown', handleInteraction)
-            document.removeEventListener('touchstart', handleInteraction)
-        }
-    }, [])
 
     useEffect(() => {
         fetchConversations()
@@ -118,28 +34,11 @@ function WhatsApp() {
         try {
             const response = await axios.get(`${WHATSAPP_API_URL}/conversations`)
 
-            console.log('📥 Fetched conversations:', response.data)
-
             // Sort conversations by last message time (most recent first)
             const sortedConversations = response.data.sort((a, b) => {
                 const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0
                 const timeB = b.last_message_time ? new Date(b.last_message_time).getTime() : 0
                 return timeB - timeA // Descending order (newest first)
-            })
-
-            // Check for takeover state changes and play notification
-            sortedConversations.forEach(conv => {
-                const previousState = previousTakeoverStates.current.get(conv.phone_number)
-                const currentState = conv.human_takeover
-
-                // If takeover just happened (changed from false/undefined to true)
-                if (previousState === false && currentState === true) {
-                    console.log('🔔 Human takeover detected for:', conv.phone_number)
-                    playNotificationSound()
-                }
-
-                // Update the state
-                previousTakeoverStates.current.set(conv.phone_number, currentState)
             })
 
             setConversations(sortedConversations)
@@ -151,15 +50,6 @@ function WhatsApp() {
                     conv => conv.phone_number === selectedConversation.phone_number
                 )
                 if (updatedSelected) {
-                    // Log if takeover state changed
-                    if (selectedConversation.human_takeover !== updatedSelected.human_takeover) {
-                        console.log('🔄 Takeover state changed:', {
-                            phone: updatedSelected.phone_number,
-                            old: selectedConversation.human_takeover,
-                            new: updatedSelected.human_takeover
-                        })
-                    }
-
                     // Force update with a new object reference to trigger React re-render
                     setSelectedConversation({ ...updatedSelected })
                 }
@@ -174,13 +64,6 @@ function WhatsApp() {
         try {
             const response = await axios.get(`${WHATSAPP_API_URL}/messages/${phoneNumber}`)
             setMessages(response.data)
-
-            // Debug: Log timestamps
-            if (response.data.length > 0) {
-                console.log('📨 Received messages:', response.data.length)
-                console.log('   First message timestamp:', response.data[0].timestamp)
-                console.log('   Last message timestamp:', response.data[response.data.length - 1].timestamp)
-            }
         } catch (error) {
             console.error('Error fetching messages:', error)
         }
@@ -201,8 +84,6 @@ function WhatsApp() {
                 fetchConversations(),
                 fetchMessages(phoneNumber)
             ])
-
-            console.log('✅ Takeover successful, UI updated')
         } catch (error) {
             console.error('Error taking over:', error)
         }
@@ -223,8 +104,6 @@ function WhatsApp() {
                 fetchConversations(),
                 fetchMessages(phoneNumber)
             ])
-
-            console.log('✅ Release successful, UI updated')
         } catch (error) {
             console.error('Error releasing:', error)
         }

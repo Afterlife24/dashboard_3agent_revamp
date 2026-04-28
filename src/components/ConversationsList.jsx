@@ -21,15 +21,15 @@ function ConversationsList({ conversations, selectedConversation, onSelectConver
                 date.getFullYear() === now.getFullYear();
 
             if (isToday) {
-                // Show only time for today's messages
-                return date.toLocaleTimeString('en-US', {
+                // Show only time for today's messages - uses browser's locale and timezone
+                return date.toLocaleTimeString(undefined, {
                     hour: 'numeric',
                     minute: '2-digit',
                     hour12: true
                 });
             } else {
-                // Show date for older messages
-                return date.toLocaleDateString('en-US', {
+                // Show date for older messages - uses browser's locale
+                return date.toLocaleDateString(undefined, {
                     month: 'short',
                     day: 'numeric'
                 });

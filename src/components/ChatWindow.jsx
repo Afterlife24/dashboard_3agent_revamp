@@ -16,11 +16,7 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
     // Debug: Log when conversation prop changes
     useEffect(() => {
         if (conversation) {
-            console.log('💬 ChatWindow updated:', {
-                phone: conversation.phone_number,
-                human_takeover: conversation.human_takeover,
-                timestamp: new Date().toISOString()
-            })
+            // Conversation updated
         }
     }, [conversation])
 
@@ -73,14 +69,6 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
 
     // Clean phone number - remove "whatsapp:" prefix
     const cleanPhoneNumber = conversation.phone_number.replace('whatsapp:', '')
-
-    // Debug logging
-    console.log('🔍 ChatWindow render:', {
-        phone: conversation.phone_number,
-        human_takeover: conversation.human_takeover,
-        isHumanMode: isHumanMode,
-        timestamp: new Date().toISOString()
-    })
 
     return (
         <div className="chat-panel">
@@ -145,18 +133,18 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
                                     date.getFullYear() === now.getFullYear();
 
                                 if (isToday) {
-                                    // Show only time for today's messages
-                                    timeDisplay = date.toLocaleTimeString('en-US', {
+                                    // Show only time for today's messages - uses browser's locale and timezone
+                                    timeDisplay = date.toLocaleTimeString(undefined, {
                                         hour: 'numeric',
                                         minute: '2-digit',
                                         hour12: true
                                     });
                                 } else {
-                                    // Show date and time for older messages
-                                    timeDisplay = date.toLocaleDateString('en-US', {
+                                    // Show date and time for older messages - uses browser's locale
+                                    timeDisplay = date.toLocaleDateString(undefined, {
                                         month: 'short',
                                         day: 'numeric'
-                                    }) + ' ' + date.toLocaleTimeString('en-US', {
+                                    }) + ' ' + date.toLocaleTimeString(undefined, {
                                         hour: 'numeric',
                                         minute: '2-digit',
                                         hour12: true
