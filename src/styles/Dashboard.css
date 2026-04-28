@@ -232,6 +232,26 @@ body {
     overflow: hidden;
 }
 
+/* Desktop: Larger font size */
+@media (min-width: 769px) {
+    .sidebar .nav-item {
+        font-size: 1.05rem !important;
+        font-weight: 600 !important;
+        padding: 1.1rem 1.25rem !important;
+    }
+
+    .sidebar .nav-icon {
+        font-size: 1.4rem !important;
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    .sidebar .nav-text {
+        font-size: 1.05rem !important;
+        font-weight: 600 !important;
+    }
+}
+
 .nav-item::before {
     content: '';
     position: absolute;
@@ -412,6 +432,13 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
+}
+
+/* Desktop: Force 3 columns for stats */
+@media (min-width: 769px) {
+    .stats-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 .stat-card {
@@ -675,6 +702,17 @@ body {
 
 /* Responsive Design */
 
+/* Hide hamburger and show all items on desktop */
+@media (min-width: 769px) {
+    .nav-item-hamburger {
+        display: none !important;
+    }
+
+    .mobile-menu-overlay {
+        display: none !important;
+    }
+}
+
 /* Desktop - ensure original sizes */
 @media (min-width: 1025px) {
     .sidebar {
@@ -710,9 +748,7 @@ body {
         padding: 1.5rem;
     }
 
-    .stats-row {
-        grid-template-columns: 1fr;
-    }
+    /* Keep stats-row as 3 columns on tablet */
 }
 
 /* Waitlist specific styles */
@@ -752,8 +788,152 @@ body {
    MOBILE RESPONSIVE STYLES - BOTTOM NAV
    ============================================ */
 
+/* Mobile Hamburger Menu */
+.mobile-menu-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.mobile-menu-content {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 280px;
+    background: rgba(15, 25, 45, 0.98);
+    backdrop-filter: blur(30px);
+    border-left: 1px solid rgba(100, 181, 246, 0.2);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.mobile-menu-header {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid rgba(100, 181, 246, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mobile-menu-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.mobile-menu-nav {
+    flex: 1;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.mobile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.mobile-menu-item:hover {
+    background: rgba(100, 181, 246, 0.1);
+    color: #fff;
+    border-color: rgba(100, 181, 246, 0.2);
+}
+
+.mobile-menu-item.active {
+    background: rgba(100, 181, 246, 0.15);
+    color: #64b5f6;
+    border-color: rgba(100, 181, 246, 0.3);
+}
+
+.mobile-menu-item .nav-icon {
+    font-size: 1.5rem;
+}
+
+.mobile-menu-item .nav-text {
+    font-size: 1rem;
+}
+
+/* Hide hamburger and desktop-only items by default */
+.nav-item-hamburger,
+.nav-item-desktop-only {
+    display: flex;
+}
+
 /* Mobile and small tablets only */
 @media (max-width: 768px) {
+    .mobile-menu-overlay {
+        display: block;
+    }
+
+    /* Hide desktop-only items in bottom bar */
+    .nav-item-desktop-only {
+        display: none !important;
+    }
+
+    /* Show hamburger button in bottom bar */
+    .nav-item-hamburger {
+        display: flex !important;
+    }
+
     .dashboard-layout {
         flex-direction: column;
         padding-bottom: 70px;
@@ -810,7 +990,8 @@ body {
         flex-shrink: 1;
         border-radius: 8px;
         margin-right: 0;
-        max-width: calc(100% / 7);
+        max-width: calc(100% / 5);
+        /* 5 items: Overview, Users, Companies, WhatsApp, More */
     }
 
     .nav-item:last-child {
@@ -887,10 +1068,12 @@ body {
     padding: 1rem;
 }
 
-/* Stats cards */
-.stats-row {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+/* Stats cards - keep responsive on mobile only */
+@media (max-width: 768px) {
+    .stats-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
 }
 
 .stat-card {

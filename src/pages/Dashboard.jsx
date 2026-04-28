@@ -36,6 +36,7 @@ function Dashboard() {
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [activeView, setActiveView] = useState("overview");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     verified: 0,
@@ -257,6 +258,41 @@ function Dashboard() {
       <div className="ambient-glow-2"></div>
       <div className="ambient-glow-3"></div>
 
+      {/* Mobile Hamburger Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)}>
+          <div className="mobile-menu-content" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-menu-header">
+              <h2>Menu</h2>
+              <button onClick={() => setMobileMenuOpen(false)} className="close-btn">✕</button>
+            </div>
+            <nav className="mobile-menu-nav">
+              <button
+                className={`mobile-menu-item ${activeView === "analytics" ? "active" : ""}`}
+                onClick={() => { setActiveView("analytics"); setMobileMenuOpen(false); }}
+              >
+                <span className="nav-icon">📈</span>
+                <span className="nav-text">Analytics</span>
+              </button>
+              <button
+                className={`mobile-menu-item ${activeView === "agentUsage" ? "active" : ""}`}
+                onClick={() => { setActiveView("agentUsage"); setMobileMenuOpen(false); }}
+              >
+                <span className="nav-icon">🤖</span>
+                <span className="nav-text">Agent Usage</span>
+              </button>
+              <button
+                className={`mobile-menu-item ${activeView === "waitlist" ? "active" : ""}`}
+                onClick={() => { setActiveView("waitlist"); setMobileMenuOpen(false); }}
+              >
+                <span className="nav-icon">📝</span>
+                <span className="nav-text">Waitlist</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      )}
+
       <aside className="sidebar">
         <div className="sidebar-header">
           <h2>🎯 Dashboard</h2>
@@ -277,21 +313,21 @@ function Dashboard() {
             <span className="nav-text">Users</span>
           </button>
           <button
-            className={`nav-item ${activeView === "analytics" ? "active" : ""}`}
+            className={`nav-item nav-item-desktop-only ${activeView === "analytics" ? "active" : ""}`}
             onClick={() => setActiveView("analytics")}
           >
             <span className="nav-icon">📈</span>
             <span className="nav-text">Analytics</span>
           </button>
           <button
-            className={`nav-item ${activeView === "agentUsage" ? "active" : ""}`}
+            className={`nav-item nav-item-desktop-only ${activeView === "agentUsage" ? "active" : ""}`}
             onClick={() => setActiveView("agentUsage")}
           >
             <span className="nav-icon">🤖</span>
             <span className="nav-text">Agent Usage</span>
           </button>
           <button
-            className={`nav-item ${activeView === "waitlist" ? "active" : ""}`}
+            className={`nav-item nav-item-desktop-only ${activeView === "waitlist" ? "active" : ""}`}
             onClick={() => setActiveView("waitlist")}
           >
             <span className="nav-icon">📝</span>
@@ -311,6 +347,14 @@ function Dashboard() {
           >
             <span className="nav-icon">💬</span>
             <span className="nav-text">WhatsApp Agent</span>
+          </button>
+          {/* Mobile Hamburger Button */}
+          <button
+            className="nav-item nav-item-hamburger"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <span className="nav-icon">☰</span>
+            <span className="nav-text">More</span>
           </button>
         </nav>
         <div className="sidebar-footer">
