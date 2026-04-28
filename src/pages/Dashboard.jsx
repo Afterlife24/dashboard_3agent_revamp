@@ -47,7 +47,7 @@ function Dashboard() {
   const [agentUsage, setAgentUsage] = useState({
     perUser: [],
     totals: [],
-    recent: [],
+    allLogs: [],
   });
   const [agentLoading, setAgentLoading] = useState(false);
   const [waitlistEntries, setWaitlistEntries] = useState([]);
@@ -626,228 +626,325 @@ function Dashboard() {
                   {agentLoading && !agentUsage.perUser.length ? (
                     <div className="loading">⏳ Loading agent usage...</div>
                   ) : (
-                    <div className="table-wrapper">
-                      <table className="users-table">
-                        <thead>
-                          <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Provider</th>
-                            <th>🌐 Web</th>
-                            <th>📞 Calling</th>
-                            <th>💬 WhatsApp</th>
-                            <th>Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {users.map((user) => {
-                            const webCount =
-                              agentUsage.perUser.find(
-                                (r) =>
-                                  r._id.userEmail === user.email &&
-                                  r._id.agentType === "web",
-                              )?.count || 0;
-                            const callingCount =
-                              agentUsage.perUser.find(
-                                (r) =>
-                                  r._id.userEmail === user.email &&
-                                  r._id.agentType === "calling",
-                              )?.count || 0;
-                            const whatsappCount =
-                              agentUsage.perUser.find(
-                                (r) =>
-                                  r._id.userEmail === user.email &&
-                                  r._id.agentType === "whatsapp",
-                              )?.count || 0;
-                            const total =
-                              webCount + callingCount + whatsappCount;
-                            return (
-                              <tr key={user._id}>
-                                <td>
-                                  <div className="user-cell">
-                                    <div className="avatar">
-                                      {user.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <span className="user-name">
-                                      {user.name}
+                    <>
+                      {/* Activity Feed - All Individual Logs */}
+                      <div style={{ marginBottom: "2rem" }}>
+                        <h3 style={{ marginBottom: "1rem", color: "#fff", fontSize: "1.2rem" }}>
+                          📊 All Activity Logs
+                        </h3>
+                        <div style={{
+                          background: "rgba(255, 255, 255, 0.05)",
+                          borderRadius: "12px",
+                          padding: "1rem",
+                          maxHeight: "500px",
+                          overflowY: "auto"
+                        }}>
+                          {agentUsage.allLogs && agentUsage.allLogs.length > 0 ? (
+                            agentUsage.allLogs.map((activity, index) => {
+                              const actionText =
+                                activity.agentType === "web" ? "opened the Web Agent" :
+                                  activity.agentType === "calling" ? "clicked Call Me button" :
+                                    "clicked Get Demo button in WhatsApp";
+
+                              const icon =
+                                activity.agentType === "web" ? "🌐" :
+                                  activity.agentType === "calling" ? "📞" :
+                                    "💬";
+
+                              const timeAgo = new Date(activity.createdAt).toLocaleString();
+
+                              return (
+                                <div
+                                  key={activity._id || index}
+                                  style={{
+                                    background: "rgba(255, 255, 255, 0.08)",
+                                    borderRadius: "8px",
+                                    padding: "0.75rem 1rem",
+                                    marginBottom: "0.5rem",
+                                    borderLeft: `3px solid ${activity.agentType === "web" ? COLORS.web :
+                                        activity.agentType === "calling" ? COLORS.calling :
+                                          COLORS.whatsapp
+                                      }`
+                                  }}
+                                >
+                                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                                    <span style={{ fontSize: "1.2rem" }}>{icon}</span>
+                                    <span style={{ color: "#fff", fontSize: "0.95rem" }}>
+                                      <strong style={{ color: "#4fc3f7" }}>{activity.userEmail}</strong>
+                                      {" "}{actionText}
                                     </span>
                                   </div>
-                                </td>
-                                <td className="email-cell">{user.email}</td>
-                                <td>
-                                  <span className={`badge ${user.provider}`}>
-                                    {user.provider === "email" ? "📧" : "🔐"}{" "}
-                                    {user.provider}
-                                  </span>
-                                </td>
-                                <td>
-                                  <span
-                                    className="stat-value"
-                                    style={{ color: COLORS.web }}
-                                  >
-                                    {webCount}
-                                  </span>
-                                </td>
-                                <td>
-                                  <span
-                                    className="stat-value"
-                                    style={{ color: COLORS.calling }}
-                                  >
-                                    {callingCount}
-                                  </span>
-                                </td>
-                                <td>
-                                  <span
-                                    className="stat-value"
-                                    style={{ color: COLORS.whatsapp }}
-                                  >
-                                    {whatsappCount}
-                                  </span>
-                                </td>
-                                <td>
-                                  <span className="stat-value">{total}</span>
-                                </td>
+                                  <div style={{
+                                    fontSize: "0.75rem",
+                                    color: "rgba(255, 255, 255, 0.5)",
+                                    marginTop: "0.25rem",
+                                    marginLeft: "2rem"
+                                  }}>
+                                    {timeAgo}
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div style={{ textAlign: "center", color: "rgba(255, 255, 255, 0.5)", padding: "2rem" }}>
+                              No activity yet
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Summary Table */}
+                      <div>
+                        <h3 style={{ marginBottom: "1rem", color: "#fff", fontSize: "1.2rem" }}>
+                          📈 Usage Summary
+                        </h3>
+                        <div className="table-wrapper">
+                          <table className="users-table">
+                            <thead>
+                              <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Provider</th>
+                                <th>🌐 Web</th>
+                                <th>📞 Calling</th>
+                                <th>💬 WhatsApp</th>
+                                <th>Total</th>
                               </tr>
-                            );
+                            </thead>
+                            <tbody>
+                              {users.map((user) => {
+                                const webCount =
+                                  agentUsage.perUser.find(
+                                    (r) =>
+                                      r._id.userEmail === user.email &&
+                                      r._id.agentType === "web",
+                                  )?.count || 0;
+                                const callingCount =
+                                  agentUsage.perUser.find(
+                                    (r) =>
+                                      r._id.userEmail === user.email &&
+                                      r._id.agentType === "calling",
+                                  )?.count || 0;
+                                const whatsappCount =
+                                  agentUsage.perUser.find(
+                                    (r) =>
+                                      r._id.userEmail === user.email &&
+                                      r._id.agentType === "whatsapp",
+                                  )?.count || 0;
+                                const total =
+                                  webCount + callingCount + whatsappCount;
+                                return (
+                                  <tr key={user._id}>
+                                    <td>
+                                      <div className="user-cell">
+                                        <div className="avatar">
+                                          {user.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <span className="user-name">
+                                          {user.name}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    <td className="email-cell">{user.email}</td>
+                                    <td>
+                                      <span className={`badge ${user.provider}`}>
+                                        {user.provider === "email" ? "📧" : "🔐"}{" "}
+                                        {user.provider}
+                                      </span>
+                                    </td>
+                                    <td>
+                                      <span
+                                        className="stat-value"
+                                        style={{ color: COLORS.web }}
+                                      >
+                                        {webCount}
+                                      </span>
+                                    </td>
+                                    <td>
+                                      <span
+                                        className="stat-value"
+                                        style={{ color: COLORS.calling }}
+                                      >
+                                        {callingCount}
+                                      </span>
+                                    </td>
+                                    <td>
+                                      <span
+                                        className="stat-value"
+                                        style={{ color: COLORS.whatsapp }}
+                                      >
+                                        {whatsappCount}
+                                      </span>
+                                    </td>
+                                    <td>
+                                      <span className="stat-value">{total}</span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+              className="stat-value"
+              style={{ color: COLORS.whatsapp }}
+                                  >
+              {whatsappCount}
+            </span>
+        </td>
+        <td>
+          <span className="stat-value">{total}</span>
+        </td>
+      </tr>
+      );
                           })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
+    </tbody>
+                      </table >
+                    </div >
+                  )
+}
+                </div >
               )}
 
-              {activeView === "waitlist" && (
-                <div className="view-content">
-                  {waitlistLoading && !waitlistEntries.length ? (
-                    <div className="loading">⏳ Loading waitlist...</div>
-                  ) : waitlistEntries.length === 0 ? (
-                    <div className="empty-state">
-                      <div className="empty-icon">📝</div>
-                      <p>No waitlist entries yet</p>
+{
+  activeView === "waitlist" && (
+    <div className="view-content">
+      {waitlistLoading && !waitlistEntries.length ? (
+        <div className="loading">⏳ Loading waitlist...</div>
+      ) : waitlistEntries.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">📝</div>
+          <p>No waitlist entries yet</p>
+        </div>
+      ) : (
+        <div className="table-wrapper">
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Company</th>
+                <th>Message</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {waitlistEntries.map((entry) => (
+                <tr key={entry._id}>
+                  <td>
+                    <div className="user-cell">
+                      <div className="avatar">
+                        {entry.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="user-name">{entry.name}</span>
                     </div>
-                  ) : (
-                    <div className="table-wrapper">
-                      <table className="users-table">
-                        <thead>
-                          <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Company</th>
-                            <th>Message</th>
-                            <th>Joined</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {waitlistEntries.map((entry) => (
-                            <tr key={entry._id}>
-                              <td>
-                                <div className="user-cell">
-                                  <div className="avatar">
-                                    {entry.name.charAt(0).toUpperCase()}
-                                  </div>
-                                  <span className="user-name">{entry.name}</span>
-                                </div>
-                              </td>
-                              <td className="email-cell">{entry.email}</td>
-                              <td>{entry.phone || "-"}</td>
-                              <td>{entry.company || "-"}</td>
-                              <td className="message-cell">
-                                {entry.message ? (
-                                  <span title={entry.message}>
-                                    {entry.message.length > 50
-                                      ? entry.message.substring(0, 50) + "..."
-                                      : entry.message}
-                                  </span>
-                                ) : (
-                                  "-"
-                                )}
-                              </td>
-                              <td className="date-cell">
-                                {formatDate(entry.createdAt)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              )}
+                  </td>
+                  <td className="email-cell">{entry.email}</td>
+                  <td>{entry.phone || "-"}</td>
+                  <td>{entry.company || "-"}</td>
+                  <td className="message-cell">
+                    {entry.message ? (
+                      <span title={entry.message}>
+                        {entry.message.length > 50
+                          ? entry.message.substring(0, 50) + "..."
+                          : entry.message}
+                      </span>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                  <td className="date-cell">
+                    {formatDate(entry.createdAt)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
 
-              {activeView === "companyDetails" && (
-                <div className="view-content">
-                  {companyLoading && !companyDetails.length ? (
-                    <div className="loading">⏳ Loading company details...</div>
-                  ) : companyDetails.length === 0 ? (
-                    <div className="empty-state">
-                      <div className="empty-icon">🏢</div>
-                      <p>No company details submitted yet</p>
+{
+  activeView === "companyDetails" && (
+    <div className="view-content">
+      {companyLoading && !companyDetails.length ? (
+        <div className="loading">⏳ Loading company details...</div>
+      ) : companyDetails.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🏢</div>
+          <p>No company details submitted yet</p>
+        </div>
+      ) : (
+        <div className="table-wrapper">
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th>Company Name</th>
+                <th>Industry</th>
+                <th>Size</th>
+                <th>Country</th>
+                <th>Phone</th>
+                <th>Website</th>
+                <th>User</th>
+                <th>Submitted</th>
+              </tr>
+            </thead>
+            <tbody>
+              {companyDetails.map((company) => (
+                <tr key={company._id}>
+                  <td>
+                    <div className="user-cell">
+                      <div className="avatar">
+                        {company.companyName.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="user-name">{company.companyName}</span>
                     </div>
-                  ) : (
-                    <div className="table-wrapper">
-                      <table className="users-table">
-                        <thead>
-                          <tr>
-                            <th>Company Name</th>
-                            <th>Industry</th>
-                            <th>Size</th>
-                            <th>Country</th>
-                            <th>Phone</th>
-                            <th>Website</th>
-                            <th>User</th>
-                            <th>Submitted</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {companyDetails.map((company) => (
-                            <tr key={company._id}>
-                              <td>
-                                <div className="user-cell">
-                                  <div className="avatar">
-                                    {company.companyName.charAt(0).toUpperCase()}
-                                  </div>
-                                  <span className="user-name">{company.companyName}</span>
-                                </div>
-                              </td>
-                              <td>{company.industry}</td>
-                              <td>{company.companySize}</td>
-                              <td>{company.country}</td>
-                              <td>{company.phoneNumber}</td>
-                              <td className="email-cell">
-                                {company.website ? (
-                                  <a href={company.website} target="_blank" rel="noopener noreferrer">
-                                    {company.website}
-                                  </a>
-                                ) : (
-                                  "-"
-                                )}
-                              </td>
-                              <td>
-                                <div className="user-info-cell">
-                                  <div>{company.userId?.name || "-"}</div>
-                                  <div className="email-cell" style={{ fontSize: "0.85rem", opacity: 0.7 }}>
-                                    {company.userId?.email || "-"}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="date-cell">
-                                {formatDate(company.createdAt)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                  </td>
+                  <td>{company.industry}</td>
+                  <td>{company.companySize}</td>
+                  <td>{company.country}</td>
+                  <td>{company.phoneNumber}</td>
+                  <td className="email-cell">
+                    {company.website ? (
+                      <a href={company.website} target="_blank" rel="noopener noreferrer">
+                        {company.website}
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                  <td>
+                    <div className="user-info-cell">
+                      <div>{company.userId?.name || "-"}</div>
+                      <div className="email-cell" style={{ fontSize: "0.85rem", opacity: 0.7 }}>
+                        {company.userId?.email || "-"}
+                      </div>
                     </div>
-                  )}
-                </div>
-              )}
+                  </td>
+                  <td className="date-cell">
+                    {formatDate(company.createdAt)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
             </>
           )}
-        </div>
-      </main>
-    </div>
+        </div >
+      </main >
+    </div >
   );
 }
 
