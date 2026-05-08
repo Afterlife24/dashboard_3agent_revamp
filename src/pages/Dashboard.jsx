@@ -348,6 +348,13 @@ function Dashboard() {
             <span className="nav-icon">💬</span>
             <span className="nav-text">WhatsApp Agent</span>
           </button>
+          <button
+            className="nav-item nav-item-voice"
+            onClick={() => navigate("/voice-calls")}
+          >
+            <span className="nav-icon">📞</span>
+            <span className="nav-text">Voice Calls</span>
+          </button>
           {/* Mobile Hamburger Button */}
           <button
             className="nav-item nav-item-hamburger"

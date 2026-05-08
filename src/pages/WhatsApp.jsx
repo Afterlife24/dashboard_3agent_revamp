@@ -13,6 +13,7 @@ function WhatsApp() {
     const [selectedConversation, setSelectedConversation] = useState(null)
     const [messages, setMessages] = useState([])
     const [isConnected, setIsConnected] = useState(false)
+    const selectedPhoneRef = useRef(null) // Track selected phone number
 
     useEffect(() => {
         fetchConversations()
@@ -22,17 +23,27 @@ function WhatsApp() {
 
     useEffect(() => {
         if (selectedConversation) {
+            selectedPhoneRef.current = selectedConversation.phone_number // Update ref
             fetchMessages(selectedConversation.phone_number)
             const interval = setInterval(() => {
-                fetchMessages(selectedConversation.phone_number)
+                // Only fetch if still selected
+                if (selectedPhoneRef.current === selectedConversation.phone_number) {
+                    fetchMessages(selectedConversation.phone_number)
+                }
             }, 3000)
             return () => clearInterval(interval)
+        } else {
+            selectedPhoneRef.current = null
         }
     }, [selectedConversation])
 
     const fetchConversations = async () => {
         try {
-            const response = await axios.get(`${WHATSAPP_API_URL}/conversations`)
+            const response = await axios.get(`${WHATSAPP_API_URL}/conversations`, {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            })
 
             // Sort conversations by last message time (most recent first)
             const sortedConversations = response.data.sort((a, b) => {
@@ -44,14 +55,20 @@ function WhatsApp() {
             setConversations(sortedConversations)
             setIsConnected(true)
 
-            // CRITICAL: Always update selected conversation to sync the chat window
-            if (selectedConversation) {
+            // ONLY update selected conversation if the phone number matches
+            // This prevents switching to a different conversation during auto-refresh
+            if (selectedPhoneRef.current) {
                 const updatedSelected = sortedConversations.find(
-                    conv => conv.phone_number === selectedConversation.phone_number
+                    conv => conv.phone_number === selectedPhoneRef.current
                 )
                 if (updatedSelected) {
-                    // Force update with a new object reference to trigger React re-render
-                    setSelectedConversation({ ...updatedSelected })
+                    // Only update if it's still the same phone number
+                    setSelectedConversation(prev => {
+                        if (prev && prev.phone_number === selectedPhoneRef.current) {
+                            return { ...updatedSelected }
+                        }
+                        return prev
+                    })
                 }
             }
         } catch (error) {
@@ -62,7 +79,11 @@ function WhatsApp() {
 
     const fetchMessages = async (phoneNumber) => {
         try {
-            const response = await axios.get(`${WHATSAPP_API_URL}/messages/${phoneNumber}`)
+            const response = await axios.get(`${WHATSAPP_API_URL}/messages/${phoneNumber}`, {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            })
             setMessages(response.data)
         } catch (error) {
             console.error('Error fetching messages:', error)
@@ -71,7 +92,14 @@ function WhatsApp() {
 
     const handleTakeover = async (phoneNumber) => {
         try {
-            await axios.post(`${WHATSAPP_API_URL}/takeover`, { phone_number: phoneNumber })
+            await axios.post(`${WHATSAPP_API_URL}/takeover`,
+                { phone_number: phoneNumber },
+                {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                }
+            )
 
             // Immediately update the UI
             setSelectedConversation(prev => ({
@@ -91,7 +119,14 @@ function WhatsApp() {
 
     const handleRelease = async (phoneNumber) => {
         try {
-            await axios.post(`${WHATSAPP_API_URL}/release`, { phone_number: phoneNumber })
+            await axios.post(`${WHATSAPP_API_URL}/release`,
+                { phone_number: phoneNumber },
+                {
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                }
+            )
 
             // Immediately update the UI
             setSelectedConversation(prev => ({
@@ -114,6 +149,10 @@ function WhatsApp() {
             await axios.post(`${WHATSAPP_API_URL}/send-message`, {
                 phone_number: phoneNumber,
                 message: message
+            }, {
+                headers: {
+                    'ngrok-skip-browser-warning': 'true'
+                }
             })
             fetchMessages(phoneNumber)
         } catch (error) {
