@@ -6,13 +6,30 @@
     flex-direction: column;
 }
 
-.conversations-panel h2 {
+.conversations-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 1.25rem 1.5rem;
+    background: #202c33;
+}
+
+.conversations-panel h2 {
     font-size: 1.5rem;
     font-weight: 700;
     color: #e9edef;
     margin: 0;
-    background: #202c33;
+}
+
+.active-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #25d366;
+    background: rgba(37, 211, 102, 0.12);
+    border: 1px solid rgba(37, 211, 102, 0.3);
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
 }
 
 .search-box {
@@ -57,6 +74,24 @@
     background: #4a5a64;
 }
 
+/* Section dividers */
+.section-label {
+    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #25d366;
+    background: rgba(37, 211, 102, 0.07);
+    border-top: 1px solid #2a3942;
+    border-bottom: 1px solid #2a3942;
+}
+
+.section-label--expired {
+    color: #667781;
+    background: rgba(102, 119, 129, 0.07);
+}
+
 .conversation-item {
     padding: 0.75rem 1rem;
     cursor: pointer;
@@ -73,6 +108,16 @@
     background: #2a3942;
 }
 
+/* Expired conversations are visually dimmed */
+.conversation-item.expired {
+    opacity: 0.65;
+}
+
+.conversation-item.expired:hover {
+    opacity: 0.85;
+    background: #202c33;
+}
+
 .conversation-info {
     position: relative;
 }
@@ -81,7 +126,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.35rem;
 }
 
 .phone-number {
@@ -114,11 +159,19 @@
 .last-message {
     font-size: 0.875rem;
     color: #8696a0;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.35rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     line-height: 1.4;
+}
+
+/* Footer row: timestamp + window badge */
+.conversation-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
 }
 
 .timestamp {
@@ -126,24 +179,52 @@
     color: #667781;
 }
 
+.window-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.15rem 0.45rem;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.window-active {
+    color: #25d366;
+    background: rgba(37, 211, 102, 0.1);
+    border: 1px solid rgba(37, 211, 102, 0.25);
+}
+
+.window-expired {
+    color: #667781;
+    background: rgba(102, 119, 129, 0.1);
+    border: 1px solid rgba(102, 119, 129, 0.25);
+}
+
+.no-conversations {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #667781;
+    font-size: 0.875rem;
+}
+
 /* ============================================
    MOBILE RESPONSIVE STYLES
    ============================================ */
 
-/* Mobile: Hide conversations panel when chat is open */
 @media (max-width: 768px) {
     .conversations-panel {
         width: 100%;
         border-right: none;
     }
 
-    /* Hide conversations when chat is selected */
     .whatsapp-content.chat-active .conversations-panel {
         display: none;
     }
 
-    .conversations-panel h2 {
+    .conversations-panel-header {
         padding: 1rem 1.25rem;
+    }
+
+    .conversations-panel h2 {
         font-size: 1.25rem;
     }
 
@@ -172,8 +253,11 @@
 }
 
 @media (max-width: 480px) {
-    .conversations-panel h2 {
+    .conversations-panel-header {
         padding: 0.875rem 1rem;
+    }
+
+    .conversations-panel h2 {
         font-size: 1.125rem;
     }
 

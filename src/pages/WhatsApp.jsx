@@ -45,24 +45,20 @@ function WhatsApp() {
                 }
             })
 
-            // Sort conversations by last message time (most recent first)
-            const sortedConversations = response.data.sort((a, b) => {
-                const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0
-                const timeB = b.last_message_time ? new Date(b.last_message_time).getTime() : 0
-                return timeB - timeA // Descending order (newest first)
-            })
+            // Backend already sorts active-first then by recency.
+            // We preserve that order here — no re-sort needed.
+            const allConversations = response.data
 
-            setConversations(sortedConversations)
+            setConversations(allConversations)
             setIsConnected(true)
 
             // ONLY update selected conversation if the phone number matches
             // This prevents switching to a different conversation during auto-refresh
             if (selectedPhoneRef.current) {
-                const updatedSelected = sortedConversations.find(
+                const updatedSelected = allConversations.find(
                     conv => conv.phone_number === selectedPhoneRef.current
                 )
                 if (updatedSelected) {
-                    // Only update if it's still the same phone number
                     setSelectedConversation(prev => {
                         if (prev && prev.phone_number === selectedPhoneRef.current) {
                             return { ...updatedSelected }
@@ -191,7 +187,7 @@ function WhatsApp() {
                         <span className="status-text">{isConnected ? 'Connected' : 'Disconnected'}</span>
                     </div>
                     <div className="stats-badge">
-                        <span className="stats-number">{conversations.length}</span>
+                        <span className="stats-number">{conversations.filter(c => c.within_24h_window).length}</span>
                         <span className="stats-label">Active Chats</span>
                     </div>
                 </div>
