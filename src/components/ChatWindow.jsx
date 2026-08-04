@@ -5,6 +5,11 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
     const [messageInput, setMessageInput] = useState('')
     const messagesEndRef = useRef(null)
     const messagesContainerRef = useRef(null)
+    // Tracks whether the user is parked at the bottom of the thread.
+    // If they've scrolled up to read history, we must not yank them back down.
+    const isAtBottomRef = useRef(true)
+    const prevPhoneRef = useRef(null)
+    const prevCountRef = useRef(0)
 
     // Handle mobile back button
     const handleMobileBack = () => {
@@ -20,30 +25,54 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
         }
     }, [conversation])
 
-    // Scroll to bottom when messages change or conversation changes
-    useEffect(() => {
-        // Use setTimeout to ensure DOM is updated before scrolling
-        const timer = setTimeout(() => {
-            scrollToBottom()
-        }, 100)
+    const phoneNumber = conversation?.phone_number || null
 
-        return () => clearTimeout(timer)
-    }, [messages, conversation])
+    // Remember if the user is at (or near) the bottom, so polling doesn't steal scroll
+    const handleScroll = () => {
+        const el = messagesContainerRef.current
+        if (!el) return
+        const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+        isAtBottomRef.current = distanceFromBottom < 80
+    }
 
-    const scrollToBottom = () => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
-        }
-        // Also try scrolling the container directly
-        if (messagesContainerRef.current) {
-            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+    const scrollToBottom = (behavior = 'smooth') => {
+        const el = messagesContainerRef.current
+        if (!el) return
+        if (behavior === 'auto') {
+            el.scrollTop = el.scrollHeight
+        } else {
+            el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
         }
     }
+
+    // Scroll to bottom only on conversation switch, or when new messages arrive
+    // while the user is already at the bottom.
+    useEffect(() => {
+        const isNewConversation = prevPhoneRef.current !== phoneNumber
+        const hasNewMessages = messages.length > prevCountRef.current
+
+        prevPhoneRef.current = phoneNumber
+        prevCountRef.current = messages.length
+
+        if (isNewConversation) {
+            isAtBottomRef.current = true
+            const timer = setTimeout(() => scrollToBottom('auto'), 100)
+            return () => clearTimeout(timer)
+        }
+
+        if (hasNewMessages && isAtBottomRef.current) {
+            const timer = setTimeout(() => scrollToBottom('smooth'), 50)
+            return () => clearTimeout(timer)
+        }
+    }, [messages, phoneNumber])
 
     const handleSend = () => {
         if (messageInput.trim() && conversation) {
             onSendMessage(conversation.phone_number, messageInput)
             setMessageInput('')
+            // Sending is an explicit action: always follow the thread down
+            isAtBottomRef.current = true
+            scrollToBottom('smooth')
         }
     }
 
@@ -103,7 +132,7 @@ function ChatWindow({ conversation, messages, onTakeover, onRelease, onSendMessa
                 </div>
             </div>
 
-            <div className="chat-messages" ref={messagesContainerRef}>
+            <div className="chat-messages" ref={messagesContainerRef} onScroll={handleScroll}>
                 {messages.length === 0 ? (
                     <div className="no-messages">
                         <span className="no-messages-icon">💬</span>

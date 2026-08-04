@@ -80,7 +80,24 @@ function WhatsApp() {
                     'ngrok-skip-browser-warning': 'true'
                 }
             })
-            setMessages(response.data)
+            const incoming = response.data || []
+
+            // Skip the state update when nothing actually changed, otherwise every
+            // 3s poll re-renders the chat and disturbs the user's scroll position.
+            setMessages(prev => {
+                if (prev.length !== incoming.length) return incoming
+                if (prev.length === 0) return prev
+
+                const last = prev[prev.length - 1]
+                const nextLast = incoming[incoming.length - 1]
+                const unchanged =
+                    last.content === nextLast.content &&
+                    last.timestamp === nextLast.timestamp &&
+                    last.sender === nextLast.sender &&
+                    last.type === nextLast.type
+
+                return unchanged ? prev : incoming
+            })
         } catch (error) {
             console.error('Error fetching messages:', error)
         }
