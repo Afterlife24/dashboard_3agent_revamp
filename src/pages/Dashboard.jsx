@@ -370,6 +370,17 @@ function Dashboard() {
             <br />
             {lastUpdated.toLocaleTimeString()}
           </p>
+          <button
+            className="nav-item nav-item-logout"
+            onClick={() => {
+              localStorage.removeItem("dashboard_auth");
+              localStorage.removeItem("dashboard_user");
+              navigate("/login");
+            }}
+          >
+            <span className="nav-icon">🚪</span>
+            <span className="nav-text">Logout</span>
+          </button>
         </div>
       </aside>
 
